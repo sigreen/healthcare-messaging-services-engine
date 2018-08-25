@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <bean
+        class="org.apache.camel.component.hl7.HL7MLLPNettyEncoderFactory" id="hl7encoder">
+        <property name="charset" value="iso-8859-1"/>
+        <property name="convertLFtoCR" value="true"/>
+    </bean>
+    <bean
+        class="org.apache.camel.component.hl7.HL7MLLPNettyDecoderFactory" id="hl7decoder">
+        <property name="charset" value="iso-8859-1"/>
+        <property name="convertLFtoCR" value="true"/>
+    </bean>
+    <camelContext id="scenario-one" xmlns="http://camel.apache.org/schema/spring">
+        <route id="consume-from-db">
+            <from id="_from1" uri="timer:foo?repeatCount=1"/>
+            <to id="_to1" uri="txfrmr:com.tracefinancial.pocs.scenario1/DbToHl7"/>
+            <split id="_split1">
+                <simple>${body}</simple>
+                <to id="_to3" uri="direct:transmit-hl7-message"/>
+            </split>
+        </route>
+        <route id="transmit-hl7-message">
+            <from id="_from3" uri="direct:transmit-hl7-message"/>
+            <onException id="_onException1">
+                <exception>ca.uhn.hl7v2.validation.ValidationException</exception>
+                <handled>
+                    <constant>true</constant>
+                </handled>
+                <log id="_log1" message="Got an exception: ${exception.message}"/>
+                <transform id="_transform1">
+                    <ref>ackGenerator</ref>
+                </transform>
+                <marshal id="_marshal1">
+                    <hl7/>
+                </marshal>
+                <log id="_log2" message="HL7 Response: ${body}"/>
+            </onException>
+            <log id="_log3" message="HL7 Request: ${body}"/>
+            <unmarshal id="_unmarshal1">
+                <hl7/>
+            </unmarshal>
+            <log id="_log4" message="Enriched HL7 Request: ${body}"/>
+            <to id="_to2" uri="netty4:tcp://35.169.46.61:8888?sync=true&amp;decoder=#hl7decoder&amp;encoder=#hl7encoder"/>
+            <log id="_log5" message="HL7 Response: ${body}"/>
+        </route>
+    </camelContext>
+</beans>
