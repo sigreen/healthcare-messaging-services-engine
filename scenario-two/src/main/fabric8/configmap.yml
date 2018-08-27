@@ -1,0 +1,15 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  # Must match the 'spring.application.name' property of the application
+  name: scenario-two-config
+data:
+  application.properties: |
+    # Override the configuration properties here
+    fhir.url1=hapi.fhir.org/baseDstu3/Patient/
+    fhir.url2=hapi.fhir.org/baseDstu3/AllergyIntolerance
+    fhir.url3=hapi.fhir.org/baseDstu3/Organization/
+    fhir.url4=hapi.fhir.org/baseDstu3/Condition
+    server.host=scenario-two-scenario-two.apps.nashville.openshiftworkshop.com
+    server.port=80
+    springfox.documentation.swagger.v2.path=/camel/api-doc
