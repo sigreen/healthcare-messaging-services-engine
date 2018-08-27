@@ -1,5 +1,7 @@
 # EDI DB to HL7 (Lab Orders from Hub to Lab System)
 
+![](images/scenario-one.png "Scenario One EIP Flow")
+
 For this scenario, we consume database records from an Oracle database in Fuse, transform them into HL7 v2.4 messages with Trace Transformer, then push the HL7 messages to an HL7 server using the MLLP protocol.
 
 #### Prerequisite installation steps
