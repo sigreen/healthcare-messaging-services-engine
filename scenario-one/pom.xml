@@ -60,6 +60,18 @@
 			<artifactId>ojdbc7</artifactId>
 			<version>12.1.0.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-sql-starter</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+		</dependency>
 
 		<!-- Trace Transformer runtime dependencies -->
 		<dependency>
@@ -95,10 +107,21 @@
 			<groupId>ca.uhn.hapi</groupId>
 			<artifactId>hapi-osgi-base</artifactId>
 			<version>${hapi.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi</groupId>
 			<artifactId>hapi-structures-v24</artifactId>
+						<version>${hapi.version}</version>
+			
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Spring-Cloud-Kubernetes -->
+		<dependency>
+			<groupId>io.fabric8</groupId>
+			<artifactId>spring-cloud-kubernetes-core</artifactId>
+			<version>LATEST</version>
 		</dependency>
 
 		<!-- Testing dependencies -->
@@ -132,30 +155,67 @@
 
 	<repositories>
 		<repository>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>fuse-public-repository</id>
+			<name>FuseSource Community Release Repository</name>
+			<url>https://repo.fusesource.com/nexus/content/groups/public</url>
+		</repository>
+		<repository>
+			<id>maven-restlet</id>
+			<name>Public online Restlet repository</name>
+			<url>http://maven.restlet.org</url>
+		</repository>
+		<repository>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 			<id>red-hat-ga-repository</id>
+			<name>Red Hat GA Repository</name>
 			<url>https://maven.repository.redhat.com/ga</url>
 		</repository>
 		<repository>
-			<id>red-hat-early-access-repository</id>
-			<url>https://maven.repository.redhat.com/earlyaccess/all</url>
-		</repository>
-		<repository>
-			<id>jboss-early-access-repository</id>
-			<url>https://repository.jboss.org/nexus/content/groups/ea</url>
+			<id>camelStaging</id>
+			<url>https://repository.jboss.org/nexus/content/repositories/fusesource_releases_external-2384</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>fuse-public-repository</id>
+			<name>FuseSource Community Release Repository</name>
+			<url>https://repo.fusesource.com/nexus/content/groups/public</url>
+		</pluginRepository>
+		<pluginRepository>
+			<releases>
+				<enabled>true</enabled>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 			<id>red-hat-ga-repository</id>
+			<name>Red Hat GA Repository</name>
 			<url>https://maven.repository.redhat.com/ga</url>
 		</pluginRepository>
 		<pluginRepository>
-			<id>red-hat-early-access-repository</id>
-			<url>https://maven.repository.redhat.com/earlyaccess/all</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>jboss-early-access-repository</id>
-			<url>https://repository.jboss.org/nexus/content/groups/ea</url>
+			<id>camelStaging</id>
+			<url>https://repository.jboss.org/nexus/content/repositories/fusesource_releases_external-2384</url>
 		</pluginRepository>
 	</pluginRepositories>
 

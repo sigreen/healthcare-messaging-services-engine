@@ -11,12 +11,25 @@
         <property name="charset" value="iso-8859-1"/>
         <property name="convertLFtoCR" value="true"/>
     </bean>
+    <bean class="org.apache.commons.dbcp.BasicDataSource"
+        destroy-method="close" id="dataSource">
+        <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
+        <property name="url" value="jdbc:oracle:thin:@//${jdbc.hostname}:${jdbc.port}/${jdbc.sid}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxIdle" value="3"/>
+        <property name="maxActive" value="6"/>
+    </bean>
+    <bean class="org.apache.camel.component.sql.SqlComponent" id="sql">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
     <camelContext id="scenario-one" xmlns="http://camel.apache.org/schema/spring">
         <route id="consume-from-db">
             <from id="_from1" uri="timer:foo?repeatCount=1"/>
             <to id="_to1" uri="txfrmr:com.tracefinancial.pocs.scenario1/DbToHl7"/>
             <split id="_split1">
                 <simple>${body}</simple>
+                <log id="_log6" message="ordersControlMessageId: [${header.ordersControlMessageId}]"/>
                 <to id="_to3" uri="direct:transmit-hl7-message"/>
             </split>
         </route>
@@ -41,8 +54,13 @@
                 <hl7/>
             </unmarshal>
             <log id="_log4" message="Enriched HL7 Request: ${body}"/>
-            <to id="_to2" uri="netty4:tcp://35.169.46.61:8888?sync=true&amp;decoder=#hl7decoder&amp;encoder=#hl7encoder"/>
+            <to id="_to2" uri="netty4:tcp://{{hl7.serverHost}}:{{hl7.serverPort}}?sync=true&amp;decoder=#hl7decoder&amp;encoder=#hl7encoder"/>
             <log id="_log5" message="HL7 Response: ${body}"/>
+            <to id="_to4" uri="direct:update-db-record"/>
+        </route>
+        <route id="update-db-record">
+            <from id="_from3" uri="direct:update-db-record"/>
+            <to id="_to5" uri="sql:UPDATE {{jdbc.username}}.IDS2SP_ORDERS_CONTROL SET STATUS='Success' WHERE MESSAGE_ID = :#ordersControlMessageId"/>
         </route>
     </camelContext>
 </beans>

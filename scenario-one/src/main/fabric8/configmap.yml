@@ -1,0 +1,14 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  # Must match the 'spring.application.name' property of the application
+  name: scenario-one-config
+data:
+  application.properties: |
+    # Override the configuration properties here
+    jdbc.username=iguana
+    jdbc.hostname=35.169.46.61
+    jdbc.port=1521
+    jdbc.sid=XE
+    hl7.serverHost=35.169.46.61
+    hl7.serverPort=8888
