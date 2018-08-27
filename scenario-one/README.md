@@ -37,10 +37,19 @@ The example can be demonstrated by running the following command:
 ### Running the example in OpenShift
 
 It is assumed that:
-- OpenShift platform is already running, if not you can find details how to [Install OpenShift at your site](https://docs.openshift.com/container-platform/3.3/install_config/index.html).
+- OpenShift platform is already running, if not you can find details how to [Install OpenShift at your site](https://docs.openshift.com/container-platform/3.9/install_config/index.html).
 - Your system is configured for Fabric8 Maven Workflow, if not you can find a [Get Started Guide](https://access.redhat.com/documentation/en/red-hat-jboss-middleware-for-openshift/3/single/red-hat-jboss-fuse-integration-services-20-for-openshift/)
 
-The example can be built and run on OpenShift using a single goal:
+#### Setup service accounts, config map and secrets
+
+1. Login to your OpenShift instance using oc login CLI
+2. Create a new OpenShift project using `oc new-project scenario-one`
+3. Create a service account using `oc create -f src/main/fabric8/sa.yml`
+4. Create the secrets using `oc create -f src/main/fabric8/secret.yml`
+5. Create the configmap using `oc create -f src/main/fabric8/configmap.yml`
+6. Add the secret to the service account using `oc secrets add sa/qs-scenario-one-config secret/scenario-one-config`
+7. Give view permission to the service account using `oc policy add-role-to-user view system:serviceaccount:scenario-one:qs-scenario-one-config`
+8. The example can be built and run on OpenShift using a single goal:
 
     mvn -P ocp
 
