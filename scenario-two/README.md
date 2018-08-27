@@ -1,6 +1,8 @@
-# API CCD Create (From FHIR)
+# API CCD Creation (From FHIR)
 
-For this scenario, we expose a RESTful API that accepts an MRN and Clinic number, which queries the FHIR / JPA server with 4 parallel requests.  The API responds with an XML CCDA document to the original caller.
+![](images/scenario-two.png "Scenario Two EIP Flow")
+
+For this scenario, we expose a RESTful API that accepts an MRN and Clinic number, then queries the FHIR / JPA server with 4 parallel requests.  The API responds with an XML CCDA document to the original caller.
 
 #### Prerequisite installation steps
 
