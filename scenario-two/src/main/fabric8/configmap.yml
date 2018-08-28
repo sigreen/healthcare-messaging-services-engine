@@ -11,5 +11,6 @@ data:
     fhir.url3=hapi.fhir.org/baseDstu3/Organization/
     fhir.url4=hapi.fhir.org/baseDstu3/Condition
     server.host=scenario-two-scenario-two.apps.nashville.openshiftworkshop.com
-    server.port=80
+    server.port=8080
+    server.apiServerPort=80
     springfox.documentation.swagger.v2.path=/camel/api-doc

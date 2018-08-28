@@ -81,7 +81,7 @@
 		<dependency>
 			<groupId>com.tracefinancial.pocs</groupId>
 			<artifactId>scenario2</artifactId>
-			<version>0.1</version>
+			<version>0.2</version>
 		</dependency>
 	</dependencies>
 	<repositories>

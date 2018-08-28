@@ -3,12 +3,12 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
     <bean
         class="com.tracegroup.transformer.camel.MessageListAggregationStrategy" id="compositeServiceAggregationStrategy"/>
-    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+    <camelContext id="scenario-two" xmlns="http://camel.apache.org/schema/spring">
         <restConfiguration apiContextPath="/api-doc" bindingMode="off"
-            component="servlet" contextPath="/camel" enableCORS="true">
+            component="servlet" contextPath="/camel" enableCORS="true"
+            host="{{server.host}}" port="{{server.apiServerPort}}">
             <dataFormatProperty key="prettyPrint" value="true"/>
-            <apiProperty key="host" value="{{server.host}}"/>
-            <apiProperty key="port" value="{{server.port}}"/>
+            <apiProperty key="apiHostPath" value="{{server.host}}"/>
             <apiProperty key="api.version" value="1.0.0"/>
             <apiProperty key="api.title" value="Scenario Two REST API"/>
             <apiProperty key="api.description" value="API that accepts an MRN and Clinical # to return a CCDA XML payload"/>
@@ -16,21 +16,19 @@
         </restConfiguration>
         <rest id="rest-8807c564-0504-4a3e-a2a6-6ca197c2efdb" path="/retrieve">
             <get id="get-ceb7c23d-4c03-4ea9-8c06-f9e6515fdb5b"
-                produces="application/json" uri="/ccda/{MRN}/{Clinic}">
+                produces="application/xml" uri="/ccda/{MRN}/{Clinic}">
                 <description>Find definition of a dictionary word</description>
                 <param dataType="string"
                     description="The medical reference number"
                     name="MRN" type="path"/>
                 <param dataType="string" description="The clinic number"
                     name="Clinic" type="path"/>
-                <to uri="direct:hello"/>
+                <to uri="direct:call-fhir"/>
             </get>
         </rest>
-        <route id="_route1">
+        <route id="call-fhir">
             <!-- MRN=4726701 Clinic=4761125 -->
-            <!--             <to id="_to2" uri="txfrmr:com.tracefinancial.pocs.scenario2/FhirToCcdaWithValidation"/> -->
-            <!--             <log id="_log2" message="BODY:[${body}]"/> -->
-            <from id="_from1" uri="direct:hello"/>
+            <from id="_from1" uri="direct:call-fhir"/>
             <log id="_log1" message="Calling route"/>
             <removeHeaders excludePattern="Clinic|MRN"
                 id="_removeHeaders1" pattern="*"/>
@@ -38,14 +36,11 @@
                 stopOnException="true"
                 strategyRef="compositeServiceAggregationStrategy" streaming="false">
                 <toD id="_toD1" uri="http4://{{fhir.url1}}${header.MRN}?_format=json&amp;bridgeEndpoint=true"/>
-                <toD id="_toD2" uri="http4://{{fhir.url2}}?patient=${header.MRN}&amp;_format=json&amp;bridgeEndpoint=true"/>
-                <toD id="_toD3" uri="http4://{{fhir.url3}}${header.Clinic}?_format=json&amp;bridgeEndpoint=true"/>
+                <toD id="_toD2" uri="http4://{{fhir.url2}}${header.Clinic}?_format=json&amp;bridgeEndpoint=true"/>
+                <toD id="_toD3" uri="http4://{{fhir.url3}}?patient=${header.MRN}&amp;_format=json&amp;bridgeEndpoint=true"/>
                 <toD id="_toD4" uri="http4://{{fhir.url4}}?patient=${header.MRN}&amp;_format=json&amp;bridgeEndpoint=true"/>
             </multicast>
-            <split id="_split1">
-                <simple>${body}</simple>
-                <log id="_log2" message="CamelSplitIndex: [${header.CamelSplitIndex}] BODY:[${body}]"/>
-            </split>
+            <to id="_to2" uri="txfrmr:com.tracefinancial.pocs.scenario2/FhirToCcda"/>
         </route>
     </camelContext>
 </beans>
