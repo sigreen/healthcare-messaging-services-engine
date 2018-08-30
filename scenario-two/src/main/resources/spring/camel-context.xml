@@ -14,8 +14,8 @@
             <apiProperty key="api.description" value="API that accepts an MRN and Clinical # to return a CCDA XML payload"/>
             <apiProperty key="api.contact.name" value="Simon Green"/>
         </restConfiguration>
-        <rest id="rest-8807c564-0504-4a3e-a2a6-6ca197c2efdb" path="/retrieve">
-            <get id="get-ceb7c23d-4c03-4ea9-8c06-f9e6515fdb5b"
+        <rest id="scenario-two-rest" path="/retrieve">
+            <get id="rest-get-ccda-xml"
                 produces="application/xml" uri="/ccda/{MRN}/{Clinic}">
                 <description>Find definition of a dictionary word</description>
                 <param dataType="string"
@@ -29,7 +29,19 @@
         <route id="call-fhir">
             <!-- MRN=4726701 Clinic=4761125 -->
             <from id="_from1" uri="direct:call-fhir"/>
-            <log id="_log1" message="Calling route"/>
+            <onException id="_onException2" useOriginalMessage="true">
+                <exception>java.lang.Exception</exception>
+                <handled>
+                    <constant>true</constant>
+                </handled>
+                <log id="_log2" message="FHIR server connectivity error.  Error is ${exception.message}. Message contents: ${body}"/>
+                <setHeader headerName="Exchange.HTTP_RESPONSE_CODE" id="_setHeader1">
+                    <constant>400</constant>
+                </setHeader>
+                <setHeader headerName="Exchange.CONTENT_TYPE" id="_setHeader2">
+                    <constant>text/plain</constant>
+                </setHeader>
+            </onException>
             <removeHeaders excludePattern="Clinic|MRN"
                 id="_removeHeaders1" pattern="*"/>
             <multicast id="_multicast1" parallelProcessing="true"
