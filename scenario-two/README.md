@@ -32,7 +32,9 @@ mvn install:install-file -DgroupId=com.tracefinancial.pocs -DartifactId=scenario
 
 The example can be demonstrated by running the following command:
 
+```
     mvn spring-boot:run
+```
 
 ### Running the example in OpenShift
 
@@ -51,17 +53,23 @@ It is assumed that:
 7. Give view permission to the service account using `oc policy add-role-to-user view system:serviceaccount:scenario-two:qs-scenario-two-config`
 8. The example can be built and run on OpenShift using a single goal:
 
+```
     mvn -P ocp
+```
 
 When the example runs in OpenShift, you can use the OpenShift client tool to inspect the status
 
 To list all the running pods:
 
+```
     oc get pods
+```
 
 Then find the name of the pod that runs this quickstart, and output the logs from the running pods with:
 
+```
     oc logs <name of pod>
+```
 
 You can also use the openshift [web console](https://docs.openshift.com/container-platform/3.3/getting_started/developers_console.html#developers-console-video) to manage the
 running pods, and view logs and much more.
