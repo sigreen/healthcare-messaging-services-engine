@@ -107,13 +107,6 @@
 			<groupId>ca.uhn.hapi</groupId>
 			<artifactId>hapi-osgi-base</artifactId>
 			<version>${hapi.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi</groupId>
-			<artifactId>hapi-structures-v24</artifactId>
-			<version>${hapi.version}</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- Spring-Cloud-Kubernetes -->

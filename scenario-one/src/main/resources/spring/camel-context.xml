@@ -11,6 +11,8 @@
         <property name="charset" value="iso-8859-1"/>
         <property name="convertLFtoCR" value="true"/>
     </bean>
+    <bean class="org.apache.camel.component.hl7.HL7"
+        factory-method="ack" id="ACK"/>
     <bean class="org.apache.commons.dbcp.BasicDataSource"
         destroy-method="close" id="dataSource">
         <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
@@ -44,7 +46,6 @@
             <to id="_to1" uri="txfrmr:com.tracefinancial.pocs.scenario1/DbToHl7"/>
             <split id="_split1">
                 <simple>${body}</simple>
-                <log id="_log6" message="ordersControlMessageId: [${header.ordersControlMessageId}]"/>
                 <to id="_to3" uri="direct:transmit-hl7-message"/>
             </split>
         </route>
@@ -57,7 +58,7 @@
                 </handled>
                 <log id="_log1" message="Got an exception: ${exception.message}"/>
                 <transform id="_transform1">
-                    <ref>ackGenerator</ref>
+                    <ref>ACK</ref>
                 </transform>
                 <marshal id="_marshal1">
                     <hl7/>
@@ -66,7 +67,7 @@
             </onException>
             <log id="_log3" message="HL7 Request: ${body}"/>
             <unmarshal id="_unmarshal1">
-                <hl7/>
+                <hl7 validate="false"/>
             </unmarshal>
             <log id="_log4" message="Enriched HL7 Request: ${body}"/>
             <to id="_to2" uri="netty4:tcp://{{hl7.serverHost}}:{{hl7.serverPort}}?sync=true&amp;decoder=#hl7decoder&amp;encoder=#hl7encoder"/>
