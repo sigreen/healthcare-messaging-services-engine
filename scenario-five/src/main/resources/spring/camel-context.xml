@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <bean
+        class="com.tracegroup.transformer.camel.MessageListAggregationStrategy" id="compositeServiceAggregationStrategy"/>
+    <bean
+        class="org.apache.camel.component.hl7.HL7MLLPNettyEncoderFactory" id="hl7encoder">
+        <property name="charset" value="iso-8859-1"/>
+        <property name="convertLFtoCR" value="true"/>
+    </bean>
+    <bean
+        class="org.apache.camel.component.hl7.HL7MLLPNettyDecoderFactory" id="hl7decoder">
+        <property name="charset" value="iso-8859-1"/>
+        <property name="convertLFtoCR" value="true"/>
+    </bean>
+    <bean class="org.apache.camel.component.hl7.HL7"
+        factory-method="ack" id="ACK"/>
+    <camelContext id="scenario-five" xmlns="http://camel.apache.org/schema/spring">
+        <restConfiguration apiContextPath="/api-doc" bindingMode="off"
+            component="servlet" contextPath="/camel" enableCORS="true"
+            host="{{server.host}}" port="{{server.apiServerPort}}">
+            <dataFormatProperty key="prettyPrint" value="true"/>
+            <apiProperty key="apiHostPath" value="{{server.host}}"/>
+            <apiProperty key="api.version" value="1.0.0"/>
+            <apiProperty key="api.title" value="Scenario Five REST API"/>
+            <apiProperty key="api.description" value="API that accepts an MRN and returns an HL7 payload"/>
+            <apiProperty key="api.contact.name" value="Simon Green"/>
+        </restConfiguration>
+        <rest id="scenario-five-rest" path="/retrieve">
+            <get id="rest-get-hl7-text" produces="text/plain" uri="/hl7/{MRN}">
+                <description>Retrieve an HL7 document</description>
+                <param dataType="string"
+                    description="The medical reference number"
+                    name="MRN" type="path"/>
+                <to uri="direct:call-fhir"/>
+            </get>
+        </rest>
+        <route id="call-fhir">
+            <!-- MRN=4726701 -->
+            <from id="_from1" uri="direct:call-fhir"/>
+            <onException id="_onException2" useOriginalMessage="true">
+                <exception>java.lang.Exception</exception>
+                <handled>
+                    <constant>true</constant>
+                </handled>
+                <log id="_log2" message="FHIR server connectivity error.  Error is ${exception.message}. Message contents: ${body}"/>
+                <setHeader headerName="Exchange.HTTP_RESPONSE_CODE" id="_setHeader1">
+                    <constant>400</constant>
+                </setHeader>
+                <setHeader headerName="Exchange.CONTENT_TYPE" id="_setHeader2">
+                    <constant>text/plain</constant>
+                </setHeader>
+            </onException>
+            <removeHeaders excludePattern="MRN" id="_removeHeaders1" pattern="*"/>
+            <setHeader headerName="GENERATED_ID" id="_setHeader3">
+                <simple>${header.MRN}</simple>
+            </setHeader>
+            <multicast id="_multicast1" parallelProcessing="true"
+                stopOnException="true"
+                strategyRef="compositeServiceAggregationStrategy" streaming="false">
+                <toD id="_toD1" uri="http4://{{fhir.url1}}${header.MRN}?_format=json&amp;bridgeEndpoint=true"/>
+                <toD id="_toD2" uri="http4://{{fhir.url2}}?patient=${header.MRN}&amp;_format=json&amp;bridgeEndpoint=true"/>
+            </multicast>
+            <to id="_to2" uri="txfrmr:com.tracefinancial.pocs.scenario5/FhirToHl7"/>
+            <to id="_to3" uri="direct:transmit-hl7-message"/>
+        </route>
+        <route id="transmit-hl7-message">
+            <from id="_from3" uri="direct:transmit-hl7-message"/>
+            <onException id="_onException1">
+                <exception>ca.uhn.hl7v2.validation.ValidationException</exception>
+                <handled>
+                    <constant>true</constant>
+                </handled>
+                <log id="_log1" message="Got an exception: ${exception.message}"/>
+                <transform id="_transform1">
+                    <ref>ACK</ref>
+                </transform>
+                <marshal id="_marshal1">
+                    <hl7/>
+                </marshal>
+                <log id="_log2" message="HL7 Response: ${body}"/>
+            </onException>
+            <log id="_log3" message="HL7 Request: ${body}"/>
+            <unmarshal id="_unmarshal1">
+                <hl7 validate="false"/>
+            </unmarshal>
+            <log id="_log4" message="Enriched HL7 Request: ${body}"/>
+            <to id="_to4" uri="netty4:tcp://{{hl7.serverHost}}:{{hl7.serverPort}}?sync=true&amp;decoder=#hl7decoder&amp;encoder=#hl7encoder"/>
+            <log id="_log5" message="HL7 Response: ${body}"/>
+        </route>
+    </camelContext>
+</beans>

@@ -15,9 +15,8 @@
             <apiProperty key="api.contact.name" value="Simon Green"/>
         </restConfiguration>
         <rest id="scenario-two-rest" path="/retrieve">
-            <get id="rest-get-ccda-xml"
-                produces="application/xml" uri="/ccda/{MRN}/{Clinic}">
-                <description>Find definition of a dictionary word</description>
+            <get id="rest-get-ccda-xml" produces="application/xml" uri="/ccda/{MRN}/{Clinic}">
+                <description>Retrieve an XML CCDA document</description>
                 <param dataType="string"
                     description="The medical reference number"
                     name="MRN" type="path"/>
