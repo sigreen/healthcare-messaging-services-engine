@@ -9,7 +9,7 @@
         <property name="keyStore" value="${amq.keystore}"/>
         <property name="keyStorePassword" value="${amq.keystorePassword}"/>
         <property name="trustStore" value="${amq.truststore}"/>
-        <property name="trustStorePassword" value="${amq.trustorePassword}"/>
+        <property name="trustStorePassword" value="${amq.truststorePassword}"/>
     </bean>
     <bean class="org.apache.camel.component.jms.JmsConfiguration" id="jmsConfig">
         <property name="connectionFactory" ref="jmsSslConnectionFactory"/>
@@ -30,9 +30,9 @@
             <apiProperty key="api.contact.name" value="Simon Green"/>
         </restConfiguration>
         <rest id="scenario-three-rest" path="/retrieve">
-            <get id="get-ceb7c23d-4c03-4ea9-8c06-f9e6515fdb5b"
+            <get id="rest-get-patient-fhir"
                 produces="application/json" uri="/patientUpdates/{MRNs}">
-                <description>Find definition of a dictionary word</description>
+                <description>Retrieve a bunch of patients using a list of MRNs</description>
                 <param dataType="string"
                     description="List of CSV delimited MRNs" name="MRNs" type="path"/>
                 <to uri="direct:hello"/>
@@ -50,7 +50,7 @@
                 </setHeader>
                 <toD id="_toD1" uri="http4://{{fhir.url1}}${header.MRN}?_format=json&amp;bridgeEndpoint=true"/>
                 <convertBodyTo id="_convertBodyTo1" type="java.lang.String"/>
-                <toD id="_toD2" pattern="InOnly" uri="amq:${amq.queueName}"/>
+                <toD id="_toD2" pattern="InOnly" uri="amq:{{amq.queueName}}"/>
             </split>
         </route>
     </camelContext>
