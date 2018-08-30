@@ -1,0 +1,28 @@
+
+spec:
+  template:
+    spec:
+      serviceAccountName: "qs-scenario-three-config"
+      volumes:
+        - name: "scenario-three-config"
+          secret:
+            # The secret must be created before deploying this application
+            secretName: "scenario-three-config"
+      containers:
+        -
+          volumeMounts:
+            - name: "scenario-three-config"
+              readOnly: true
+              # Mount the secret where spring-cloud-kubernetes is configured to read it
+              # see src/main/resources/bootstrap.yml
+              mountPath: "/etc/secrets/scenario-three-config"
+          resources:
+           requests:
+             cpu: "0.2"
+             memory: 512Mi
+           limits:
+             cpu: "1.0"
+             memory: 512Mi
+          env:
+          - name: SPRING_APPLICATION_JSON
+            value: '{"server":{"tomcat":{"max-threads":1}}}'

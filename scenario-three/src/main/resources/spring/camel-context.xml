@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd        http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <bean class="org.mycompany.CompositeServiceAggregationStrategy" id="compositeServiceAggregationStrategy"/>
+    <bean class="org.apache.activemq.ActiveMQSslConnectionFactory" id="jmsSslConnectionFactory">
+        <property name="brokerURL" value="${amq.brokerUrl}"/>
+        <property name="userName" value="${amq.userName}"/>
+        <property name="password" value="${amq.password}"/>
+        <property name="keyStore" value="${amq.keystore}"/>
+        <property name="keyStorePassword" value="${amq.keystorePassword}"/>
+        <property name="trustStore" value="${amq.truststore}"/>
+        <property name="trustStorePassword" value="${amq.trustorePassword}"/>
+    </bean>
+    <bean class="org.apache.camel.component.jms.JmsConfiguration" id="jmsConfig">
+        <property name="connectionFactory" ref="jmsSslConnectionFactory"/>
+        <property name="concurrentConsumers" value="10"/>
+    </bean>
+    <bean class="org.apache.activemq.camel.component.ActiveMQComponent" id="amq">
+        <property name="configuration" ref="jmsConfig"/>
+    </bean>
+    <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+        <restConfiguration apiContextPath="/api-doc" bindingMode="off"
+            component="servlet" contextPath="/camel" enableCORS="true"
+            host="{{server.host}}" port="{{server.apiServerPort}}">
+            <dataFormatProperty key="prettyPrint" value="true"/>
+            <apiProperty key="apiHostPath" value="{{server.host}}"/>
+            <apiProperty key="api.version" value="1.0.0"/>
+            <apiProperty key="api.title" value="Scenario Three REST API"/>
+            <apiProperty key="api.description" value="API that accepts multiple MRN's and updates SFDC"/>
+            <apiProperty key="api.contact.name" value="Simon Green"/>
+        </restConfiguration>
+        <rest id="scenario-three-rest" path="/retrieve">
+            <get id="get-ceb7c23d-4c03-4ea9-8c06-f9e6515fdb5b"
+                produces="application/json" uri="/patientUpdates/{MRNs}">
+                <description>Find definition of a dictionary word</description>
+                <param dataType="string"
+                    description="List of CSV delimited MRNs" name="MRNs" type="path"/>
+                <to uri="direct:hello"/>
+            </get>
+        </rest>
+        <route id="scenario-three-route">
+            <!-- MRN=58b3663e3425def0f0f69505,58b3663e3425def0f0f6960a -->
+            <from id="_from1" uri="direct:hello"/>
+            <log id="_log1" message="Calling route"/>
+            <removeHeaders excludePattern="MRNs" id="_removeHeaders1" pattern="*"/>
+            <split id="_split1">
+                <tokenize headerName="MRNs" token=","/>
+                <setHeader headerName="MRN" id="_setHeader1">
+                    <simple>${body}</simple>
+                </setHeader>
+                <toD id="_toD1" uri="http4://{{fhir.url1}}${header.MRN}?_format=json&amp;bridgeEndpoint=true"/>
+                <convertBodyTo id="_convertBodyTo1" type="java.lang.String"/>
+                <toD id="_toD2" pattern="InOnly" uri="amq:${amq.queueName}"/>
+            </split>
+        </route>
+    </camelContext>
+</beans>

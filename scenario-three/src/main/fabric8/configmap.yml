@@ -1,0 +1,17 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  # Must match the 'spring.application.name' property of the application
+  name: scenario-three-config
+data:
+  application.properties: |
+    # Override the configuration properties here
+    fhir.url1=syntheticmass.mitre.org/fhir/Patient/
+    amq.brokerUrl=failover://ssl://broker-amq-tcp-ssl-fuse-ignite.apps.nashville.openshiftworkshop.com:443
+    amq.userName=amq
+    amq.keystore=broker.ks
+    amq.truststore=broker.ts
+    amq.queueName=incomingMessageChannel
+    server.host=scenario-three-fuse-ignite.apps.nashville.openshiftworkshop.com
+    server.port=8080
+    server.apiServerPort=80
