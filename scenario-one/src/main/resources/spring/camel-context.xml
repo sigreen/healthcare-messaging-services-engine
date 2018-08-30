@@ -25,7 +25,22 @@
     </bean>
     <camelContext id="scenario-one" xmlns="http://camel.apache.org/schema/spring">
         <route id="consume-from-db">
-            <from id="_from1" uri="timer:foo?repeatCount=1"/>
+            <from id="_from1" uri="sql:SELECT MESSAGE_ID FROM {{jdbc.username}}.IDS2SP_ORDERS_CONTROL WHERE STATUS='W'?onConsume=UPDATE {{jdbc.username}}.IDS2SP_ORDERS_CONTROL SET STATUS='Success' WHERE MESSAGE_ID = :#MESSAGE_ID&amp;onConsumeFailed=UPDATE {{jdbc.username}}.IDS2SP_ORDERS_CONTROL SET STATUS='Unsuccess' WHERE MESSAGE_ID = :#MESSAGE_ID"/>
+            <split id="_split2">
+                <simple>${body}</simple>
+                <setHeader headerName="MESSAGE_ID" id="_setHeader1">
+                    <simple>
+						${body[MESSAGE_ID]}
+					</simple>
+                </setHeader>
+                <setBody id="_setBody1">
+                    <simple>${null}</simple>
+                </setBody>
+                <to id="_to4" uri="direct:transform-db-to-hl7"/>
+            </split>
+        </route>
+        <route id="transform-db-to-hl7">
+            <from id="_from2" uri="direct:transform-db-to-hl7"/>
             <to id="_to1" uri="txfrmr:com.tracefinancial.pocs.scenario1/DbToHl7"/>
             <split id="_split1">
                 <simple>${body}</simple>
@@ -56,11 +71,6 @@
             <log id="_log4" message="Enriched HL7 Request: ${body}"/>
             <to id="_to2" uri="netty4:tcp://{{hl7.serverHost}}:{{hl7.serverPort}}?sync=true&amp;decoder=#hl7decoder&amp;encoder=#hl7encoder"/>
             <log id="_log5" message="HL7 Response: ${body}"/>
-            <to id="_to4" uri="direct:update-db-record"/>
-        </route>
-        <route id="update-db-record">
-            <from id="_from3" uri="direct:update-db-record"/>
-            <to id="_to5" uri="sql:UPDATE {{jdbc.username}}.IDS2SP_ORDERS_CONTROL SET STATUS='Success' WHERE MESSAGE_ID = :#ordersControlMessageId"/>
         </route>
     </camelContext>
 </beans>

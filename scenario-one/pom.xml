@@ -91,7 +91,7 @@
 		<dependency>
 			<groupId>com.tracefinancial.pocs</groupId>
 			<artifactId>scenario1</artifactId>
-			<version>0.3</version>
+			<version>0.4</version>
 		</dependency>
 
 		<!-- HL7 Libraries -->
@@ -112,8 +112,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi</groupId>
 			<artifactId>hapi-structures-v24</artifactId>
-						<version>${hapi.version}</version>
-			
+			<version>${hapi.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
