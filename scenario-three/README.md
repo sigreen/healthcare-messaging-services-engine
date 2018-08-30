@@ -56,3 +56,22 @@ Then find the name of the pod that runs this quickstart, and output the logs fro
 ```
 
 You can also use the openshift [web console](https://docs.openshift.com/container-platform/3.3/getting_started/developers_console.html#developers-console-video) to manage the running pods, and view logs and much more.
+
+#### Configuring the Fuse Online Integration
+
+1. Login to your Fuse Online instance.
+2. Login to SFDC using your credentials.  Navigate to Create > Apps and create a Connected App.  Be sure to enter a callback URL that matches the URL for your Fuse Online instance.
+3. In Fuse Online, navigate to Settings > Salesforce and enter your SFDC client ID and secret
+4. In Fuse Online, navigate to Connections and setup a SFDC connection
+5. Create a connection to your AMQ broker using the failover URL: `failover://ssl://broker-amq-tcp-ssl-fuse-online.apps.nashville.openshiftworkshop.com:443`.  Ensure client certificates is disabled.
+6. If you have setup your connections correctly, you should see the following:
+
+![](images/scenario3-step-6.png "Scenario Three Step 6")
+
+7. Create a new integration, consuming from the AMQ broker (source) and specifying queue "incomingMessageChannel"
+8. For the output data type, use either a JSON instance or schema of the Patient object.  There are sample JSON messages in the incomingMessageChannel that can be used.
+9. Set the SFDC Health Cloud destination.  Select "Create or Update Record".
+10. Map the fields according to your mapping specification
+11. Publish the integration.
+12. Tail the SpringBoot log via the OpenShift console.
+
