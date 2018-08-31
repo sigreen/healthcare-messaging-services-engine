@@ -33,7 +33,7 @@ mvn install:install-file -DgroupId=com.tracefinancial.pocs -DartifactId=scenario
 The example can be demonstrated by running the following command:
 
 ```
-mvn spring-boot:run
+mvn spring-boot:run -Dspring.cloud.kubernetes.enabled=false
 ```
 
 ### Running the example in OpenShift
@@ -46,9 +46,9 @@ It is assumed that:
 
 1. Login to your OpenShift instance using oc login CLI
 2. Create a new OpenShift project using `oc new-project scenario-one`
-3. Create a service account using `oc create -f src/main/fabric8/sa.yml`
-4. Create the secrets using `oc create -f src/main/fabric8/secret.yml`
-5. Create the configmap using `oc create -f src/main/fabric8/configmap.yml`
+3. Create a service account using `oc create -f sa.yml`
+4. Create the secrets using `oc create -f secret.yml`
+5. Create the configmap using `oc create -f configmap.yml`
 6. Add the secret to the service account using `oc secrets add sa/qs-scenario-one-config secret/scenario-one-config`
 7. Give view permission to the service account using `oc policy add-role-to-user view system:serviceaccount:scenario-one:qs-scenario-one-config`
 8. The example can be built and run on OpenShift using a single goal:
