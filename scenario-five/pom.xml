@@ -17,6 +17,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
 		<hapi.version>2.2</hapi.version>
+		<docker.image.prefix>example</docker.image.prefix>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -26,6 +27,34 @@
 				<version>3.0.11.fuse-000039-redhat-1</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.jackson</groupId>
+				<artifactId>jackson-all</artifactId>
+				<version>1.8.5</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.poi</groupId>
+				<artifactId>poi</artifactId>
+				<version>4.0.1</version>
+			</dependency>
+			<!-- Trace Transformer runtime dependencies -->
+			<dependency>
+				<groupId>com.tracegroup.transformer</groupId>
+				<artifactId>transformer-runtime-skinny</artifactId>
+				<version>3.6.9-SNAPSHOT</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.tracegroup.transformer.libraries</groupId>
+				<artifactId>currencylib</artifactId>
+				<version>1.0.11</version>
+			</dependency>
+			<!-- FHIR to HL7 Transformer project -->
+			<dependency>
+				<groupId>com.tracefinancial.pocs</groupId>
+				<artifactId>scenario5</artifactId>
+				<version>0.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -64,20 +93,39 @@
 			<artifactId>springfox-swagger-ui</artifactId>
 			<version>2.8.0</version>
 		</dependency>
-
-		<!-- Trace Transformer runtime dependencies -->
+		<dependency>
+			<groupId>io.hawt</groupId>
+			<artifactId>hawtio-springboot</artifactId>
+			<version>1.5.6</version>
+		</dependency>
 		<dependency>
 			<groupId>com.tracegroup.transformer</groupId>
 			<artifactId>transformer-runtime-skinny</artifactId>
-			<version>3.6.9-SNAPSHOT</version>
 		</dependency>
-
 		<dependency>
-			<groupId>com.tracegroup.transformer</groupId>
+			<groupId>com.tracegroup.transformer.libraries</groupId>
 			<artifactId>currencylib</artifactId>
-			<version>[1.0,)</version>
 		</dependency>
-
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.tracefinancial.pocs</groupId>
+			<artifactId>scenario5</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
 		<!-- HL7 Libraries -->
 		<dependency>
 			<groupId>org.apache.camel</groupId>
@@ -93,39 +141,30 @@
 			<version>${hapi.version}</version>
 		</dependency>
 
-		<!-- FHIR to HL7 Transformer project -->
-		<dependency>
-			<groupId>com.tracefinancial.pocs</groupId>
-			<artifactId>scenario5</artifactId>
-			<version>0.1</version>
-		</dependency>
+
 	</dependencies>
 	<repositories>
 		<repository>
-			<id>red-hat-ga-repository</id>
+			<id>redhat-public</id>
 			<url>https://maven.repository.redhat.com/ga</url>
 		</repository>
 		<repository>
-			<id>red-hat-early-access-repository</id>
+			<id>redhat-ea</id>
 			<url>https://maven.repository.redhat.com/earlyaccess/all</url>
 		</repository>
 		<repository>
-			<id>jboss-early-access-repository</id>
-			<url>https://repository.jboss.org/nexus/content/groups/ea</url>
+			<id>igexin</id>
+			<url>http://mvn.gt.igexin.com/nexus/content/repositories/releases/</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
-			<id>red-hat-ga-repository</id>
+			<id>redhat-public</id>
 			<url>https://maven.repository.redhat.com/ga</url>
 		</pluginRepository>
 		<pluginRepository>
-			<id>red-hat-early-access-repository</id>
+			<id>redhat-ea</id>
 			<url>https://maven.repository.redhat.com/earlyaccess/all</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>jboss-early-access-repository</id>
-			<url>https://repository.jboss.org/nexus/content/groups/ea</url>
 		</pluginRepository>
 	</pluginRepositories>
 	<build>
@@ -177,6 +216,22 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.2.3</version>
+				<configuration>
+					<imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+					<dockerDirectory>src/main/docker</dockerDirectory>
+					<resources>
+						<resource>
+							<targetPath>/</targetPath>
+							<directory>${project.build.directory}</directory>
+							<include>${project.build.finalName}.jar</include>
+						</resource>
+					</resources>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

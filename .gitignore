@@ -5,3 +5,4 @@ RemoteSystemsTempFiles
 .project
 .settings
 target
+lib

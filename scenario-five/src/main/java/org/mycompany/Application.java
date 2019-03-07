@@ -21,6 +21,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
+import io.hawt.web.AuthenticationFilter;
+
 
 /**
  * A spring-boot application that includes a Camel route builder to setup the Camel routes
@@ -31,6 +33,7 @@ public class Application {
 
     // must have a main method spring-boot can run
     public static void main(String[] args) {
+        System.setProperty(AuthenticationFilter.HAWTIO_AUTHENTICATION_ENABLED, "false");
         SpringApplication.run(Application.class, args);
     }
     

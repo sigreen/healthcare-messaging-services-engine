@@ -36,6 +36,48 @@ The example can be demonstrated by running the following command:
     mvn spring-boot:run
 ```
 
+To test via the Swagger docs, navigate to `http://localhost:8080/swagger-ui.html` via the Web Browser.
+
+### Running the example in Docker
+
+1. Setup Docker and ensure it is running on your machine.  On MacOS, I ran the following commands:
+
+	```bash
+	docker-machine create default
+	docker-machine start default
+	eval "$(docker-machine env default)"
+	```
+	
+2.  Ensure Docker is accessible from the CLI by typing `docker ps`.  You should get back an empty response indicating no docker images are running.
+
+3.  Run `docker-machine ip` to determine what the IP is for docker. You'll need this IP to connect to the Fuse Management Console (hawt.IO) running inside the SpringBoot container.
+
+4.  Ping your local host machine to capture you IP.  Update the hostname for `activemq.broker.url` located in `src/main/resources/application.properties` with your host machine IP.
+
+5.  To build the project, execute the following:
+
+	```bash
+	mvn -s configuration/settings.xml clean package docker:build
+	```
+    
+6.  To run the project, execute the following:
+
+	```bash
+	docker run -p 8080:8080 -p 8081:8081 -t example/scenario-five
+	```
+	
+7.  After you've finished running the docker example, be sure to tidy up:
+	
+	```bash
+	docker ps (to obtain the container ID)
+	docker stop <container ID>
+	docker rm <container ID>
+	```
+	
+## Viewing the Fuse Management Console (HawtIO)
+
+Once the application has started up successfully, in any web browser, go to `localhost:8081/hawtio/index.html` and select the Camel tab. You should see your Camel Routes running.  For the docker example, replace this with `http:\\docker-host-ip:8081/hawtio/index.html`.
+
 ### Running the example in OpenShift
 
 It is assumed that:
